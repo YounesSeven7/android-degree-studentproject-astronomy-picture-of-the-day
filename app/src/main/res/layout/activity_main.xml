@@ -7,15 +7,18 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="false">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.ortiz.touchview.TouchImageView
-            android:id="@+id/img_picture_view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="fitCenter"
+            android:id="@+id/iv_picture_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -25,8 +28,8 @@
             android:id="@+id/wv_video_player"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:visibility="gone"
             android:background="@android:color/black"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="16:9"
             app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +40,7 @@
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/wv_video_player"
             app:layout_constraintEnd_toEndOf="@+id/wv_video_player"
             app:layout_constraintStart_toStartOf="@+id/wv_video_player"
@@ -45,7 +48,6 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <LinearLayout
         android:id="@+id/bottom_sheet"
@@ -59,11 +61,11 @@
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <TextView
-            tools:text="Title"
+            android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            tools:textColor="@android:color/white"
+            tools:text="Title"
             android:textAppearance="?android:textAppearanceLarge"
             android:textColor="@android:color/white" />
 
@@ -80,9 +82,10 @@
             android:padding="16dp">
 
             <TextView
-                tools:text="Info about the item presented above"
+                android:id="@+id/tv_explanation"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                tools:text="Info about the item presented above"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="@android:color/white" />
 

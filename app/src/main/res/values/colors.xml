@@ -11,6 +11,8 @@
     <!-- Dark transparent color -->
     <color name="background_transparent_black">#77000000</color>
 
+    <color name="transparent">#00FFFFFF</color>
+
 
 
 </resources>

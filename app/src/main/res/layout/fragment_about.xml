@@ -27,14 +27,15 @@
         android:layout_height="wrap_content"
         android:justificationMode="inter_word"
         android:text="@string/about_content"
-        android:textAppearance="?android:textAppearanceMedium" />
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="@android:color/white"/>
 
     <ImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
-        tools:src="@drawable/ic_nasa_logo" />
+        android:src="@drawable/ic_nasa_logo" />
 
 
 </LinearLayout>

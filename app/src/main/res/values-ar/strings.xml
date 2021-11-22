@@ -24,5 +24,8 @@
 
     <!-- Share -->
     <string name="share">مشاركة</string>
+    <string name="DONT_ACCEPT_PERMISSION">لم يتم قبول الصلاحية</string>
+    <string name="YOU_CANT_GET_INFO_OF_NEXT_DAYS">لا يمكنك الحصول معلومات الأيام القادمة</string>
+
 
 </resources>

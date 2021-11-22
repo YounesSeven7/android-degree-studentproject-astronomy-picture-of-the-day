@@ -26,5 +26,8 @@
     <string name="share">Share</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="DONT_ACCEPT_PERMISSION">don\'t accept permission</string>
+    <string name="YOU_CANT_GET_INFO_OF_NEXT_DAYS">you can\'t get info of next day\'s</string>
+
 
 </resources>

@@ -46,6 +46,17 @@
             app:layout_constraintStart_toStartOf="@+id/wv_video_player"
             app:layout_constraintTop_toTopOf="@+id/wv_video_player" />
 
+        <Button
+            android:id="@+id/button_full_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="full screen"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/wv_video_player" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -55,6 +66,7 @@
         android:layout_height="wrap_content"
         android:background="@color/background_transparent_black"
         android:orientation="vertical"
+        android:visibility="visible"
         app:behavior_hideable="false"
         app:behavior_peekHeight="120dp"
         app:behavior_skipCollapsed="true"
@@ -65,9 +77,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            tools:text="Title"
             android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            tools:text="Title" />
 
         <View
             android:layout_width="match_parent"
@@ -85,9 +97,9 @@
                 android:id="@+id/tv_explanation"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:text="Info about the item presented above"
                 android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                tools:text="Info about the item presented above" />
 
         </androidx.core.widget.NestedScrollView>
 

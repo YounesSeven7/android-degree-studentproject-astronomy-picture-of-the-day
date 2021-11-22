@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
     MenuItem menuDownloadHd;
     URL urlDownloadHd;
     AstronomyInfo astronomyInfo;
-
+    NetWork netWork;
 
     ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -81,47 +81,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
 
                 @Override
                 public void onActivityResult(Boolean result) {
-                    if (result == true){
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_SEND);
-                        // send info
-                        if (astronomyInfo.getMediaType().equals(JsonToAstronomyInfo.IS_MEDIA_TYPE_Image)) {
-                            intent.setType("image/jpeg");
-                            Picasso.get().load(astronomyInfo.getUrl().toString()).into(new Target() {
-                                @Override
-                                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                    //Bitmap bitmap = BitmapFactory.decodeResource(getResources(), placeHolderDrawable);
-                                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                                    String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Title", null);
-                                    Uri imageUri =  Uri.parse(path);
-                                    intent.putExtra(Intent.EXTRA_STREAM, imageUri);
-                                }
-
-                                @Override
-                                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                                }
-
-                                @Override
-                                public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                                }
-                            });
-
-                            //intent.putExtra("send_title", astronomyInfo.getTitle());
-                        } else if (astronomyInfo.getMediaType().equals(JsonToAstronomyInfo.IS_MEDIA_TYPE_VIDEO)) {
-                            intent.setType("text/plain");
-                            intent.putExtra(Intent.EXTRA_TEXT, Uri.parse(astronomyInfo.getUrl().toString()));
-                        }
-                        startActivity(Intent.createChooser(intent, "share via"));
-                    } else {
-                        Toast.makeText(getBaseContext(), "لم يتم قبول الصلاحية", Toast.LENGTH_SHORT).show();
-                    }
-
-
-
-
+                    shareImage(result);
                 }
             });
 
@@ -130,22 +90,13 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-       /*
-        tvTitle = findViewById(R.id.tv_title);
-        tvExplanation = findViewById(R.id.tv_explanation);
-        webView = findViewById(R.id.wv_video_player);
-        progressBar = findViewById(R.id.progressBar);*/
-
-        //
+        // this code get date of to day
         String toDay = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
-        //Toast.makeText(this, toDay+"", Toast.LENGTH_SHORT).show();
-        NetWork.setInfoWithDate(toDay, getBaseContext());
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
+        netWork = NetWork.getInstance(this);
+        netWork.setInfoWithDate(toDay, getBaseContext());
+        requestQueue = netWork.getRequestQueue();
         requestInfo();
-
-
     }
-
     public Uri getLocalBitmapUri(Bitmap bmp) {
         Uri bmpUri = null;
         try {
@@ -196,10 +147,43 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
         }
         return super.onOptionsItemSelected(item);
     }
+    private void shareImage(Boolean result){
+        if (result){
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            // send if image
+            if (astronomyInfo.getMediaType().equals(JsonToAstronomyInfo.IS_MEDIA_TYPE_Image)) {
+                intent.setType("image/jpeg");
+                Picasso.get().load(astronomyInfo.getUrl().toString()).into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Title", null);
+                        Uri imageUri =  Uri.parse(path);
+                        intent.putExtra(Intent.EXTRA_STREAM, imageUri);
+                    }
 
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {}
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {}
+                });
+                // send if video
+            } else if (astronomyInfo.getMediaType().equals(JsonToAstronomyInfo.IS_MEDIA_TYPE_VIDEO)) {
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, astronomyInfo.getUrl().toString());
+            }
+            startActivity(Intent.createChooser(intent, "share_info"));
+        } else {
+            Toast.makeText(getBaseContext(), R.string.DONT_ACCEPT_PERMISSION, Toast.LENGTH_SHORT).show();
+        }
+
+    }
     private void requestInfo(){
         binding.progressBar.setVisibility(View.VISIBLE);
-        URL url = NetWork.getUrl();
+        URL url = netWork.getUrl();
         if (url != null){
             JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                     url.toString(),
@@ -211,8 +195,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                             binding.tvTitle.setText(astronomyInfo.getTitle());
                             binding.tvExplanation.setText(astronomyInfo.getExplanation());
                             if (astronomyInfo.getHdUrl() != null){
-
-
                                 // to stop music if play
                                 binding.wvVideoPlayer.onPause();
                                 //
@@ -229,12 +211,29 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                                 binding.wvVideoPlayer.onResume();
                                 binding.ivPictureView.setVisibility(View.GONE);
                                 binding.progressBar.setVisibility(View.GONE);
+                                binding.buttonFullScreen.setVisibility(View.VISIBLE);
                                 binding.wvVideoPlayer.setVisibility(View.VISIBLE);
                                 menuDownloadHd.setVisible(false);
+                                // web view settings
                                 binding.wvVideoPlayer.getSettings().setLoadsImagesAutomatically(true);
                                 binding.wvVideoPlayer.getSettings().setJavaScriptEnabled(true);
                                 binding.wvVideoPlayer.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
                                 binding.wvVideoPlayer.loadUrl(astronomyInfo.getUrl().toString());
+                                // full screen
+                                binding.buttonFullScreen.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        String textButton = (String) binding.buttonFullScreen.getText();
+                                        if (textButton.equals("full screen")){
+                                            hideSystemUI();
+                                        } else if (textButton.equals("unable full screen")) {
+                                            showSystemUI();
+                                        }
+
+                                    }
+                                });
+
+
                             }
                         }
                     },
@@ -255,21 +254,52 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                             } else if (volleyError instanceof TimeoutError) {
                                 message = "Connection TimeOut! Please check your internet connection.";
                             }
-                            Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getBaseContext(), String.valueOf(message), Toast.LENGTH_SHORT).show();
                         }
                     });
-            //jsonObjectRequest.setTag("TAG");
-            requestQueue.add(jsonArrayRequest);
+            netWork.addToRequestQueue(jsonArrayRequest);
         }
 
     }
 
     @Override
     public void onSelectDay(String date) {
-        //Toast.makeText(getBaseContext(), String.valueOf(date), Toast.LENGTH_SHORT).show();
-        NetWork.setInfoWithDate(date, getBaseContext());
+        netWork.setInfoWithDate(date, getBaseContext());
         Log.d("younes", date);
         requestInfo();
 
+    }
+    private void hideSystemUI() {
+        // Enables regular immersive mode.
+        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
+        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        binding.buttonFullScreen.setText("unable full screen");
+    }
+    // Shows the system bars by removing all the flags
+    // except for the ones that make the content appear under the system bars.
+    private void showSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        binding.buttonFullScreen.setText("full screen");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        netWork.getRequestQueue().stop();
     }
 }

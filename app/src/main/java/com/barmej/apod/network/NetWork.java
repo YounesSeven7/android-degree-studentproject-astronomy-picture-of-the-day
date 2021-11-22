@@ -7,8 +7,11 @@ import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
+import com.barmej.apod.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,20 +35,32 @@ public class NetWork {
     public static  String END_DATE = "2021-11-13";
 
 
-    public static void setInfoWithDate(String date, Context context){
+    private static NetWork newInstance;
+    private RequestQueue requestQueue;
+    private Context context;
+
+    // this variable  get date if date selected is larger then date of to day
+    private static String saveDate;
+
+    public NetWork(Context context) {
+        this.context = context;
+        requestQueue = getRequestQueue();
+    }
+
+    public  void setInfoWithDate(String date, Context context) {
         String toDay = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
-        //if (toDay.equals(date))
         try {
             long dataMilliSeconds = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date).getTime();
             long toDayMolliSeconds = Calendar.getInstance().getTime().getTime();
-            Log.d("younes", toDayMolliSeconds + ">=" + dataMilliSeconds+ "            "+ Calendar.getInstance().getTime());
             if (toDayMolliSeconds >= dataMilliSeconds){
                 START_DATE = date;
                 END_DATE = date;
+                saveDate = date;
             } else{
-                START_DATE = toDay;
-                END_DATE = toDay;
-                Toast.makeText(context, "لايمكنك الحصول معلومات الأيام القادمة ", Toast.LENGTH_SHORT).show();
+                START_DATE = saveDate;
+                END_DATE = saveDate;
+                if (this.requestQueue != null)
+                Toast.makeText(this.context, R.string.YOU_CANT_GET_INFO_OF_NEXT_DAYS, Toast.LENGTH_SHORT).show();
             }
 
         } catch (ParseException e) {
@@ -53,8 +68,7 @@ public class NetWork {
         }
         
     }
-
-    public static URL getUrl(){
+    public  URL getUrl() {
         Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
         Uri uri = uriBuilder
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
@@ -70,5 +84,21 @@ public class NetWork {
             return null;
         }
     }
+    public static synchronized NetWork getInstance(Context context) {
+        if (newInstance == null) {
+            newInstance = new NetWork(context);
+        }
+        return newInstance;
+    }
+    public RequestQueue getRequestQueue() {
+        if (requestQueue == null){
+            requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        }
+        return requestQueue;
+    }
+    public <T> void addToRequestQueue(Request<T> req) {
+        getRequestQueue().add(req);
+    }
+
 
 }

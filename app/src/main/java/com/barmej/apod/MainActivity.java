@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
     URL urlDownloadHd;
     AstronomyInfo astronomyInfo;
     NetWork netWork;
+    FragmentAbout fragmentAbout;
 
     ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -138,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                 break;
             case R.id.action_about:
                 FragmentManager fm = getSupportFragmentManager();
-                FragmentAbout fragmentAbout = new FragmentAbout();
+                fragmentAbout = new FragmentAbout();
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.replace(R.id.cl_container, fragmentAbout);
                 ft.addToBackStack(null);
@@ -194,13 +195,19 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                             astronomyInfo = JsonToAstronomyInfo.getAstronomyInfo(jsonArray);
                             binding.tvTitle.setText(astronomyInfo.getTitle());
                             binding.tvExplanation.setText(astronomyInfo.getExplanation());
+                            if (fragmentAbout != null){
+                                fragmentAbout.getView().setVisibility(View.GONE);
+                            }
                             if (astronomyInfo.getHdUrl() != null){
+
+
                                 // to stop music if play
                                 binding.wvVideoPlayer.onPause();
                                 //
                                 binding.ivPictureView.setVisibility(View.VISIBLE);
                                 binding.wvVideoPlayer.setVisibility(View.GONE);
                                 binding.progressBar.setVisibility(View.GONE);
+                                binding.buttonFullScreen.setVisibility(View.GONE);
                                 menuDownloadHd.setVisible(true);
                                 //
                                 Glide.with(getBaseContext())
@@ -213,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerFragmen
                                 binding.progressBar.setVisibility(View.GONE);
                                 binding.buttonFullScreen.setVisibility(View.VISIBLE);
                                 binding.wvVideoPlayer.setVisibility(View.VISIBLE);
+
                                 menuDownloadHd.setVisible(false);
                                 // web view settings
                                 binding.wvVideoPlayer.getSettings().setLoadsImagesAutomatically(true);
